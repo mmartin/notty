@@ -734,10 +734,11 @@ module Unescape = struct
         Some (`Key (`ASCII (Uchar.unsafe_to_char u), []))
     | Uchar u -> Some (`Key (`Uchar u, []))
 
-    | C0 '\x1b'        -> key `Escape []
-    | C0 ('\b'|'\x7f') -> key `Backspace []
-    | C0 '\n'          -> key `Enter []
-    | C0 '\t'          -> key `Tab []
+    | C0 '\x1b' -> key `Escape []
+    | C0 '\x7f' -> key `Backspace []
+    | C0 '\b'   -> key `Backspace [`Ctrl]
+    | C0 '\n'   -> key `Enter []
+    | C0 '\t'   -> key `Tab []
 
     | C0 x -> key (`ASCII Char.(code x + 0x40 |> unsafe_chr)) [`Ctrl]
     | C1 x -> key (`ASCII x) [`Meta]
