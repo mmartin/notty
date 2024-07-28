@@ -165,7 +165,7 @@ module A = struct
 
   type color = int
   type style = int
-  type t = { fg : color; bg : color; st : style }
+  type t = { fg : color; bg : color; st : style; custom : string }
 
   let equal t1 t2 = t1.fg = t2.fg && t1.bg = t2.bg && t1.st = t2.st
 
@@ -214,17 +214,19 @@ module A = struct
   and blink     = 8
   and reverse   = 16
 
-  let empty = { fg = 0; bg = 0; st = 0 }
+  let empty = { fg = 0; bg = 0; st = 0; custom = "" }
 
  let (++) a1 a2 =
    if a1 == empty then a2 else if a2 == empty then a1 else
      { fg = (match a2.fg with 0 -> a1.fg | x -> x)
      ; bg = (match a2.bg with 0 -> a1.bg | x -> x)
-     ; st = a1.st lor a2.st }
+     ; st = a1.st lor a2.st
+     ; custom = a1.custom ^ a2.custom }
 
   let fg fg = { empty with fg }
   let bg bg = { empty with bg }
   let st st = { empty with st }
+  let custom c = { empty with custom = c }
 end
 
 module I = struct
@@ -512,7 +514,7 @@ module Cap = struct
 
   let sts = [ ";1"; ";3"; ";4"; ";5"; ";7" ]
 
-  let sgr { A.fg; bg; st } buf =
+  let sgr { A.fg; bg; st; custom } buf =
     buf <| "\x1b[0";
     let rgb888 buf x =
       buf <! A.r x; buf <. ';'; buf <! A.g x; buf <. ';'; buf <! A.b x in
@@ -535,7 +537,8 @@ module Cap = struct
           | (0, _) | (_, []) -> ()
           | (_, x::xs) -> if f land 1 > 0 then buf <| x; go (f lsr 1) xs in
         go st sts );
-    buf <. 'm'
+    buf <. 'm';
+    buf <| custom
 
   let ansi = {
       skip    = (fun n b -> b <| "\x1b[0m"; Buffer.add_chars b ' ' n)

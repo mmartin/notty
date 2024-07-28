@@ -168,6 +168,9 @@ module A : sig
 
   val st : style -> attr
   (** [st s] is [empty] with style [s]. *)
+
+  val custom : string -> attr
+  (** [custom c] is [empty] with custom [c]. *)
 end
 
 (** [I] is for image.
